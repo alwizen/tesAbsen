@@ -1,0 +1,317 @@
+<?php
+// database/seeders/DatabaseSeeder.php
+
+namespace Database\Seeders;
+
+use App\Models\Department;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use App\Models\WorkSchedule;
+use App\Models\Employee;
+use Illuminate\Support\Facades\Hash;
+
+class DatabaseSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Create Filament Users
+        User::create([
+            'name' => 'Super Admin',
+            'email' => 'admin@admin.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'name' => 'Supervisor Dapur',
+            'email' => 'supervisor@example.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Departments (Master Penggajian)
+        |--------------------------------------------------------------------------
+        */
+
+        $timPersiapan = Department::create([
+            'name' => 'Tim Persiapan',
+            'code' => 'PREP-01',
+            'description' => 'Tim persiapan bahan makanan',
+            'is_active' => true,
+            'salary_type' => 'daily',
+            'daily_rate' => 120000,
+            'hourly_rate' => 0,
+            'allowance' => 10000,
+            'pj_allowance' => 15000,
+        ]);
+
+        $timPengolahan = Department::create([
+            'name' => 'Tim Pengolahan',
+            'code' => 'COOK-01',
+            'description' => 'Tim pengolahan dan memasak',
+            'is_active' => true,
+            'salary_type' => 'daily',
+            'daily_rate' => 130000,
+            'hourly_rate' => 0,
+            'allowance' => 15000,
+            'pj_allowance' => 20000,
+        ]);
+
+        $timPemorsian = Department::create([
+            'name' => 'Tim Pemorsian',
+            'code' => 'PORT-01',
+            'description' => 'Tim pemorsian makanan',
+            'is_active' => true,
+            'salary_type' => 'daily',
+            'daily_rate' => 110000,
+            'hourly_rate' => 0,
+            'allowance' => 10000,
+            'pj_allowance' => 15000,
+        ]);
+
+        $timDistribusi = Department::create([
+            'name' => 'Tim Distribusi',
+            'code' => 'DIST-01',
+            'description' => 'Tim distribusi makanan',
+            'is_active' => true,
+            'salary_type' => 'daily',
+            'daily_rate' => 115000,
+            'hourly_rate' => 0,
+            'allowance' => 10000,
+            'pj_allowance' => 15000,
+        ]);
+
+        $timCuciShift1 = Department::create([
+            'name' => 'Tim Cuci Ompreng Shift 1',
+            'code' => 'WASH1-01',
+            'description' => 'Tim cuci peralatan shift 1',
+            'is_active' => true,
+            'salary_type' => 'hourly',
+            'daily_rate' => 0,
+            'hourly_rate' => 15000,
+            'allowance' => 5000,
+            'pj_allowance' => 10000,
+        ]);
+
+        $timCuciShift2 = Department::create([
+            'name' => 'Tim Cuci Ompreng Shift 2',
+            'code' => 'WASH2-01',
+            'description' => 'Tim cuci peralatan shift 2',
+            'is_active' => true,
+            'salary_type' => 'hourly',
+            'daily_rate' => 0,
+            'hourly_rate' => 15000,
+            'allowance' => 5000,
+            'pj_allowance' => 10000,
+        ]);
+
+        $timKebersihan = Department::create([
+            'name' => 'Tim Petugas Kebersihan',
+            'code' => 'CLEAN-01',
+            'description' => 'Tim petugas kebersihan',
+            'is_active' => true,
+            'salary_type' => 'hourly',
+            'daily_rate' => 0,
+            'hourly_rate' => 14000,
+            'allowance' => 5000,
+            'pj_allowance' => 10000,
+        ]);
+
+        $spvDapur = Department::create([
+            'name' => 'Supervisor Dapur',
+            'code' => 'SPV-01',
+            'description' => 'Supervisor dapur',
+            'is_active' => true,
+            'salary_type' => 'daily',
+            'daily_rate' => 200000,
+            'hourly_rate' => 0,
+            'allowance' => 25000,
+            'pj_allowance' => 0, // SPV tidak pakai PJ allowance
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Work Schedules
+        |--------------------------------------------------------------------------
+        */
+
+        WorkSchedule::create([
+            'department_id' => $timPersiapan->id,
+            'check_in_time' => '19:00:00',
+            'check_out_time' => '03:00:00',
+            'grace_period_minutes' => 15,
+            'is_overnight' => true,
+            'max_work_hours' => 8,
+            'is_active' => true,
+        ]);
+
+        WorkSchedule::create([
+            'department_id' => $timPengolahan->id,
+            'check_in_time' => '00:00:00',
+            'check_out_time' => '08:00:00',
+            'grace_period_minutes' => 15,
+            'is_overnight' => false,
+            'max_work_hours' => 8,
+            'is_active' => true,
+        ]);
+
+        WorkSchedule::create([
+            'department_id' => $timPemorsian->id,
+            'check_in_time' => '04:00:00',
+            'check_out_time' => '12:00:00',
+            'grace_period_minutes' => 15,
+            'is_overnight' => false,
+            'max_work_hours' => 8,
+            'is_active' => true,
+        ]);
+
+        WorkSchedule::create([
+            'department_id' => $timDistribusi->id,
+            'check_in_time' => '06:00:00',
+            'check_out_time' => '14:00:00',
+            'grace_period_minutes' => 15,
+            'is_overnight' => false,
+            'max_work_hours' => 8,
+            'is_active' => true,
+        ]);
+
+        WorkSchedule::create([
+            'department_id' => $timCuciShift1->id,
+            'check_in_time' => '11:00:00',
+            'check_out_time' => '19:00:00',
+            'grace_period_minutes' => 15,
+            'is_overnight' => false,
+            'max_work_hours' => 8,
+            'is_active' => true,
+        ]);
+
+        WorkSchedule::create([
+            'department_id' => $timCuciShift2->id,
+            'check_in_time' => '16:00:00',
+            'check_out_time' => '00:00:00',
+            'grace_period_minutes' => 15,
+            'is_overnight' => true,
+            'max_work_hours' => 8,
+            'is_active' => true,
+        ]);
+
+        WorkSchedule::create([
+            'department_id' => $timKebersihan->id,
+            'check_in_time' => '11:00:00',
+            'check_out_time' => '19:00:00',
+            'grace_period_minutes' => 15,
+            'is_overnight' => false,
+            'max_work_hours' => 8,
+            'is_active' => true,
+        ]);
+
+        WorkSchedule::create([
+            'department_id' => $spvDapur->id,
+            'check_in_time' => '05:00:00',
+            'check_out_time' => '17:00:00',
+            'grace_period_minutes' => 10,
+            'is_overnight' => false,
+            'max_work_hours' => 12,
+            'is_active' => true,
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Employees
+        |--------------------------------------------------------------------------
+        */
+
+        Employee::insert([
+            [
+                'rfid_number' => '1',
+                'employee_number' => 'PREP001',
+                'name' => 'Budi Santoso',
+                'department_id' => $timPersiapan->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+            [
+                'rfid_number' => '2',
+                'employee_number' => 'PREP002',
+                'name' => 'Siti Aminah',
+                'department_id' => $timPersiapan->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+            [
+                'rfid_number' => '3',
+                'employee_number' => 'COOK001',
+                'name' => 'Ahmad Wijaya',
+                'department_id' => $timPengolahan->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+            [
+                'rfid_number' => '4',
+                'employee_number' => 'COOK002',
+                'name' => 'Dewi Lestari',
+                'department_id' => $timPengolahan->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+            [
+                'rfid_number' => '5',
+                'employee_number' => 'PORT001',
+                'name' => 'Eko Prasetyo',
+                'department_id' => $timPemorsian->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+            [
+                'rfid_number' => '6',
+                'employee_number' => 'DIST001',
+                'name' => 'Fitri Handayani',
+                'department_id' => $timDistribusi->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+            [
+                'rfid_number' => '7',
+                'employee_number' => 'WASH101',
+                'name' => 'Gunawan Setiawan',
+                'department_id' => $timCuciShift1->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+            [
+                'rfid_number' => '8',
+                'employee_number' => 'WASH201',
+                'name' => 'Hendra Kusuma',
+                'department_id' => $timCuciShift2->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+            [
+                'rfid_number' => '9',
+                'employee_number' => 'CLEAN001',
+                'name' => 'Indah Permata',
+                'department_id' => $timKebersihan->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+            [
+                'rfid_number' => '10',
+                'employee_number' => 'CLEAN002',
+                'name' => 'Joko Susilo',
+                'department_id' => $timKebersihan->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+            [
+                'rfid_number' => '11',
+                'employee_number' => 'SPV001',
+                'name' => 'Kartika Sari',
+                'department_id' => $spvDapur->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+            ],
+        ]);
+    }
+}
