@@ -29,7 +29,9 @@ class MobileAttendanceController extends Controller
             return redirect()->route('mobile.login')->with('error', 'Akun tidak valid atau tidak aktif.');
         }
 
-        return view('mobile.tap', compact('employee'));
+        $setting = \App\Models\Setting::first();
+
+        return view('mobile.tap', compact('employee', 'setting'));
     }
 
     /**

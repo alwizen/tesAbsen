@@ -77,10 +77,36 @@ class AttendanceService
     }
 
     /**
+     * Helper to calculate Haversine distance in meters
+     */
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2) {
+        $earthRadius = 6371000; // in meters
+
+        $latDelta = deg2rad($lat2 - $lat1);
+        $lonDelta = deg2rad($lon2 - $lon1);
+
+        $a = sin($latDelta / 2) * sin($latDelta / 2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($lonDelta / 2) * sin($lonDelta / 2);
+        
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
+    }
+
+    /**
      * Proses tap Mobile Web dengan Foto dan Lokasi
      */
     public function processMobileTap(Employee $employee, $tappedAt, $photoPath, $lat, $lng): array
     {
+        $setting = \App\Models\Setting::first();
+        if ($setting && $setting->latitude && $setting->longitude && $setting->radius) {
+            $distance = $this->calculateDistance($setting->latitude, $setting->longitude, $lat, $lng);
+            if ($distance > $setting->radius) {
+                throw new \Exception('Lokasi Anda (' . round($distance) . 'm) berada di luar jangkauan absensi yang diizinkan (' . $setting->radius . 'm).');
+            }
+        }
+
         $tappedTime = Carbon::parse($tappedAt);
 
         $workSchedule = $employee->department->activeWorkSchedule;

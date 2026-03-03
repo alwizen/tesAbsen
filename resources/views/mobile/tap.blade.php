@@ -421,6 +421,22 @@
             let currentLng = null;
             let capturedImageData = null;
 
+            // Helper to compute distance in meters
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371e3;
+                const p1 = lat1 * Math.PI/180;
+                const p2 = lat2 * Math.PI/180;
+                const dp = (lat2-lat1) * Math.PI/180;
+                const dl = (lon2-lon1) * Math.PI/180;
+
+                const a = Math.sin(dp/2) * Math.sin(dp/2) +
+                          Math.cos(p1) * Math.cos(p2) *
+                          Math.sin(dl/2) * Math.sin(dl/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+                return R * c;
+            }
+
             // 1. Dapatkan Lokasi GPS
             function requestLocation() {
                 if ("geolocation" in navigator) {
@@ -428,8 +444,25 @@
                         (position) => {
                             currentLat = position.coords.latitude;
                             currentLng = position.coords.longitude;
-                            locStatus.textContent = 'Lokasi Ditemukan';
-                            locStatus.className = 'status-badge success';
+                            
+                            let settingLat = {{ $setting ? ($setting->latitude ?? 'null') : 'null' }};
+                            let settingLng = {{ $setting ? ($setting->longitude ?? 'null') : 'null' }};
+                            let settingRadius = {{ $setting ? ($setting->radius ?? 'null') : 'null' }};
+
+                            if (settingLat !== null && settingLng !== null && settingRadius !== null) {
+                                const dist = calculateDistance(settingLat, settingLng, currentLat, currentLng);
+                                if (dist <= settingRadius) {
+                                    locStatus.textContent = 'On Site';
+                                    locStatus.className = 'status-badge success';
+                                } else {
+                                    locStatus.textContent = 'Di Luar Jangkauan (' + Math.round(dist) + 'm)';
+                                    locStatus.className = 'status-badge error';
+                                }
+                            } else {
+                                locStatus.textContent = 'Lokasi Ditemukan';
+                                locStatus.className = 'status-badge success';
+                            }
+
                             locCoords.textContent = `${currentLat.toFixed(5)}, ${currentLng.toFixed(5)}`;
                         },
                         (error) => {
