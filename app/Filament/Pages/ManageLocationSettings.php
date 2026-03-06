@@ -14,7 +14,6 @@ class ManageLocationSettings extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-map-pin';
 
-    // Hapus 'static' di sini
     protected string $view = 'filament.pages.manage-location-settings';
 
     public ?array $data = [];
@@ -24,7 +23,8 @@ class ManageLocationSettings extends Page
         $setting = Setting::first();
         if ($setting) {
             $this->form->fill($setting->toArray());
-        } else {
+        }
+        else {
             $this->form->fill();
         }
     }
@@ -33,25 +33,25 @@ class ManageLocationSettings extends Page
     {
         return $schema
             ->components([
-                Section::make('Location Settings')
-                    ->description('Set the office location and the acceptable radius for mobile attendance.')
-                    ->components([
-                        TextInput::make('latitude')
-                            ->required()
-                            ->numeric()
-                            ->label('Latitude'),
-                        TextInput::make('longitude')
-                            ->required()
-                            ->numeric()
-                            ->label('Longitude'),
-                        TextInput::make('radius')
-                            ->required()
-                            ->numeric()
-                            ->label('Radius (in meters)')
-                            ->helperText('Maximum distance from the office location allowed for check-in/out.'),
-                    ])
-                    ->columns(3),
+            Section::make('Location Settings')
+            ->description('Set the office location and the acceptable radius for mobile attendance.')
+            ->components([
+                TextInput::make('latitude')
+                ->required()
+                ->numeric()
+                ->label('Latitude'),
+                TextInput::make('longitude')
+                ->required()
+                ->numeric()
+                ->label('Longitude'),
+                TextInput::make('radius')
+                ->required()
+                ->numeric()
+                ->label('Radius (in meters)')
+                ->helperText('Maximum distance from the office location allowed for check-in/out.'),
             ])
+            ->columns(3),
+        ])
             ->statePath('data');
     }
 
@@ -62,7 +62,8 @@ class ManageLocationSettings extends Page
         $setting = Setting::first();
         if ($setting) {
             $setting->update($data);
-        } else {
+        }
+        else {
             Setting::create($data);
         }
 

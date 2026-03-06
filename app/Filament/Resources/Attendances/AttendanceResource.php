@@ -128,6 +128,38 @@ class AttendanceResource extends Resource
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-map-pin')
                     ->color('warning'),
+                TextColumn::make('radius')
+                    ->label('Radius')
+                    ->getStateUsing(function (Attendance $record) {
+                        $setting = \App\Models\Setting::first();
+                        if (!$setting || !$setting->latitude || !$setting->longitude || !$setting->radius) {
+                            return '-';
+                        }
+                        
+                        $lat = $record->location_in_lat ?? $record->location_out_lat;
+                        $lng = $record->location_in_lng ?? $record->location_out_lng;
+                        
+                        if (!$lat || !$lng) return '-';
+                        
+                        // Haversine distance
+                        $earthRadius = 6371000;
+                        $latDelta = deg2rad($lat - $setting->latitude);
+                        $lonDelta = deg2rad($lng - $setting->longitude);
+                        
+                        $a = sin($latDelta / 2) * sin($latDelta / 2) +
+                             cos(deg2rad($setting->latitude)) * cos(deg2rad($lat)) *
+                             sin($lonDelta / 2) * sin($lonDelta / 2);
+                        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+                        $distance = $earthRadius * $c;
+                        
+                        return $distance <= $setting->radius ? 'on site' : 'diluar radius';
+                    })
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'on site' => 'success',
+                        'diluar radius' => 'danger',
+                        default => 'gray',
+                    }),
                 TextColumn::make('late_minutes')
                     ->label('Terlambat')
                     ->formatStateUsing(function ($state) {

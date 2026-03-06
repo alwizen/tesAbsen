@@ -13,9 +13,9 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         \App\Models\Setting::create([
-            'latitude' => '-6.200000', // Default Jakarta latitude
-            'longitude' => '106.816666', // Default Jakarta longitude
-            'radius' => 100, // 100 meters
+            'latitude' => '6.8701093',
+            'longitude' => '109.1862354',
+            'radius' => 100,
         ]);
     }
 }

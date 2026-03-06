@@ -40,7 +40,6 @@ class MobileAttendanceController extends Controller
     public function mobileTap(Request $request): JsonResponse
     {
         $request->validate([
-            'image_token' => 'required|string', // Base64 image
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
         ]);
@@ -55,23 +54,7 @@ class MobileAttendanceController extends Controller
             ], 401);
         }
 
-        // Simpan foto base64
-        $imageData = $request->image_token;
-        $imageParts = explode(";base64,", $imageData);
-        if (count($imageParts) == 2) {
-            $imageTypeAux = explode("image/", $imageParts[0]);
-            $imageType = $imageTypeAux[1];
-            $imageBase64 = base64_decode($imageParts[1]);
-            $filename = 'attendances/' . $employee->id . '_' . time() . '.' . $imageType;
-
-            Storage::disk('public')->put($filename, $imageBase64);
-        }
-        else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Format gambar tidak valid',
-            ], 400);
-        }
+        $filename = null;
 
         try {
             $result = $this->attendanceService->processMobileTap(

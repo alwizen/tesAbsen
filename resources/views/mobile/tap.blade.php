@@ -379,22 +379,12 @@
 
         <div id="error-message" class="alert-error"></div>
 
-        <div class="camera-container">
-            <div class="camera-wrapper">
-                <video id="video-feed" autoplay playsinline></video>
-                <img id="image-preview" src="" alt="Hasil Foto">
-            </div>
-
-            <button id="btn-capture" class="btn-capture" aria-label="Ambil Foto"></button>
-
-            <div id="action-buttons" class="action-buttons">
-                <button id="btn-retake" class="btn btn-retake">Foto Ulang</button>
-                <button id="btn-submit-att" class="btn btn-submit">Check In/Out</button>
-            </div>
+        <div class="camera-container" style="background: transparent; box-shadow: none; padding: 0;">
+            <button id="btn-submit-att" class="btn btn-submit"
+                style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: none;">Check
+                In/Out</button>
         </div>
     </main>
-
-    <canvas id="canvas"></canvas>
 
     <div id="loader">
         <div class="spinner"></div>
@@ -404,35 +394,27 @@
     <!-- Script Kamera dan Geo -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const video = document.getElementById('video-feed');
-            const preview = document.getElementById('image-preview');
-            const canvas = document.getElementById('canvas');
-            const btnCapture = document.getElementById('btn-capture');
-            const btnRetake = document.getElementById('btn-retake');
             const btnSubmit = document.getElementById('btn-submit-att');
-            const actionButtons = document.getElementById('action-buttons');
             const locStatus = document.getElementById('loc-status');
             const locCoords = document.getElementById('loc-coords');
             const errorMsg = document.getElementById('error-message');
             const loader = document.getElementById('loader');
 
-            let currentStream = null;
             let currentLat = null;
             let currentLng = null;
-            let capturedImageData = null;
 
             // Helper to compute distance in meters
             function calculateDistance(lat1, lon1, lat2, lon2) {
                 const R = 6371e3;
-                const p1 = lat1 * Math.PI/180;
-                const p2 = lat2 * Math.PI/180;
-                const dp = (lat2-lat1) * Math.PI/180;
-                const dl = (lon2-lon1) * Math.PI/180;
+                const p1 = lat1 * Math.PI / 180;
+                const p2 = lat2 * Math.PI / 180;
+                const dp = (lat2 - lat1) * Math.PI / 180;
+                const dl = (lon2 - lon1) * Math.PI / 180;
 
-                const a = Math.sin(dp/2) * Math.sin(dp/2) +
-                          Math.cos(p1) * Math.cos(p2) *
-                          Math.sin(dl/2) * Math.sin(dl/2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                const a = Math.sin(dp / 2) * Math.sin(dp / 2) +
+                    Math.cos(p1) * Math.cos(p2) *
+                    Math.sin(dl / 2) * Math.sin(dl / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
                 return R * c;
             }
@@ -444,18 +426,18 @@
                         (position) => {
                             currentLat = position.coords.latitude;
                             currentLng = position.coords.longitude;
-                            
-                            let settingLat = {{ $setting ? ($setting->latitude ?? 'null') : 'null' }};
-                            let settingLng = {{ $setting ? ($setting->longitude ?? 'null') : 'null' }};
-                            let settingRadius = {{ $setting ? ($setting->radius ?? 'null') : 'null' }};
+
+                            let settingLat = @json($setting ? $setting -> latitude : null);
+                            let settingLng = @json($setting ? $setting -> longitude : null);
+                            let settingRadius = @json($setting ? $setting -> radius : null);
 
                             if (settingLat !== null && settingLng !== null && settingRadius !== null) {
                                 const dist = calculateDistance(settingLat, settingLng, currentLat, currentLng);
                                 if (dist <= settingRadius) {
-                                    locStatus.textContent = 'On Site';
+                                    locStatus.textContent = 'on site';
                                     locStatus.className = 'status-badge success';
                                 } else {
-                                    locStatus.textContent = 'Di Luar Jangkauan (' + Math.round(dist) + 'm)';
+                                    locStatus.textContent = 'diluar radius';
                                     locStatus.className = 'status-badge error';
                                 }
                             } else {
@@ -464,6 +446,9 @@
                             }
 
                             locCoords.textContent = `${currentLat.toFixed(5)}, ${currentLng.toFixed(5)}`;
+
+                            // Tampilkan tombol submit setelah lokasi didapat
+                            btnSubmit.style.display = 'block';
                         },
                         (error) => {
                             let msg = 'Gagal akses lokasi';
@@ -482,30 +467,6 @@
                 }
             }
 
-            // 2. Setup Kamera Depan
-            async function setupCamera() {
-                try {
-                    const constraints = {
-                        video: {
-                            facingMode: 'user', // Selfie cam
-                            width: { ideal: 720 },
-                            height: { ideal: 960 }
-                        },
-                        audio: false
-                    };
-
-                    currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-                    video.srcObject = currentStream;
-                    video.style.display = 'block';
-                    preview.style.display = 'none';
-                    btnCapture.style.display = 'flex';
-                    actionButtons.style.display = 'none';
-                } catch (err) {
-                    console.error("Camera error:", err);
-                    showError('Gagal mengakses kamera. Pastikan browser memiliki izin kamera dan tidak sedang digunakan aplikasi lain.');
-                }
-            }
-
             // Tampilkan error umum
             function showError(message) {
                 errorMsg.textContent = message;
@@ -515,48 +476,11 @@
 
             // Init
             requestLocation();
-            setupCamera();
-
-            // AMBIL FOTO
-            btnCapture.addEventListener('click', () => {
-                if (!currentLat || !currentLng) {
-                    showError('Tunggu hingga lokasi Anda berhasil ditemukan.');
-                    return;
-                }
-
-                // Gambar frame saat ini ke canvas
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext('2d');
-
-                // Cermin gambar karena selfie
-                ctx.translate(canvas.width, 0);
-                ctx.scale(-1, 1);
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                capturedImageData = canvas.toDataURL('image/jpeg', 0.8);
-
-                video.style.display = 'none';
-                preview.src = capturedImageData;
-                preview.style.display = 'block';
-
-                btnCapture.style.display = 'none';
-                actionButtons.style.display = 'flex';
-            });
-
-            // FOTO ULANG
-            btnRetake.addEventListener('click', () => {
-                capturedImageData = null;
-                preview.style.display = 'none';
-                video.style.display = 'block';
-                actionButtons.style.display = 'none';
-                btnCapture.style.display = 'flex';
-            });
 
             // SUBMIT ABSENSI
             btnSubmit.addEventListener('click', async () => {
-                if (!capturedImageData || !currentLat || !currentLng) {
-                    showError('Data lokasi atau foto belum lengkap.');
+                if (!currentLat || !currentLng) {
+                    showError('Data lokasi belum ditemukan.');
                     return;
                 }
 
@@ -573,7 +497,7 @@
                             'X-CSRF-TOKEN': csrfToken
                         },
                         body: JSON.stringify({
-                            image_token: capturedImageData,
+                            image_token: "", // Foto ditiadakan, kirim empty string
                             latitude: currentLat,
                             longitude: currentLng
                         })
@@ -584,18 +508,16 @@
                     loader.classList.remove('show');
 
                     if (response.ok && data.success) {
-                        alert(data.message); // Bisa diganti dg modal sweetalert
-                        window.location.reload(); // Reload untuk reset form
+                        alert(data.message);
+                        window.location.reload();
                     } else {
                         showError(data.message || 'Gagal mengirim data absensi.');
-                        btnRetake.click(); // Reset ke layar kamera
                     }
 
                 } catch (err) {
                     console.error(err);
                     loader.classList.remove('show');
                     showError('Terjadi kesalahan jaringan.');
-                    btnRetake.click();
                 }
             });
         });

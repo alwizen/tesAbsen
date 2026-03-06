@@ -79,16 +79,17 @@ class AttendanceService
     /**
      * Helper to calculate Haversine distance in meters
      */
-    private function calculateDistance($lat1, $lon1, $lat2, $lon2) {
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
         $earthRadius = 6371000; // in meters
 
         $latDelta = deg2rad($lat2 - $lat1);
         $lonDelta = deg2rad($lon2 - $lon1);
 
         $a = sin($latDelta / 2) * sin($latDelta / 2) +
-             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-             sin($lonDelta / 2) * sin($lonDelta / 2);
-        
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($lonDelta / 2) * sin($lonDelta / 2);
+
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadius * $c;
@@ -99,13 +100,13 @@ class AttendanceService
      */
     public function processMobileTap(Employee $employee, $tappedAt, $photoPath, $lat, $lng): array
     {
-        $setting = \App\Models\Setting::first();
-        if ($setting && $setting->latitude && $setting->longitude && $setting->radius) {
-            $distance = $this->calculateDistance($setting->latitude, $setting->longitude, $lat, $lng);
-            if ($distance > $setting->radius) {
-                throw new \Exception('Lokasi Anda (' . round($distance) . 'm) berada di luar jangkauan absensi yang diizinkan (' . $setting->radius . 'm).');
-            }
-        }
+        // $setting = \App\Models\Setting::first();
+        // if ($setting && $setting->latitude && $setting->longitude && $setting->radius) {
+        //     $distance = $this->calculateDistance($setting->latitude, $setting->longitude, $lat, $lng);
+        //     if ($distance > $setting->radius) {
+        //         throw new \Exception('Lokasi Anda (' . round($distance) . 'm) berada di luar jangkauan absensi yang diizinkan (' . $setting->radius . 'm).');
+        //     }
+        // }
 
         $tappedTime = Carbon::parse($tappedAt);
 
@@ -128,7 +129,6 @@ class AttendanceService
          */
         if ($attendance) {
             $attendance->check_out_at = $tappedTime;
-            $attendance->photo_out_path = $photoPath;
             $attendance->location_out_lat = $lat;
             $attendance->location_out_lng = $lng;
             $attendance->work_hours = $attendance->calculateWorkHours();
@@ -161,7 +161,6 @@ class AttendanceService
             'employee_id' => $employee->id,
             'work_date' => $workDate,
             'check_in_at' => $tappedTime,
-            'photo_in_path' => $photoPath,
             'location_in_lat' => $lat,
             'location_in_lng' => $lng,
             'late_minutes' => $workSchedule->calculateLateMinutes($tappedTime),

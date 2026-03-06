@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #061E48 0%, #D1B06C 50%, #B5E0E9 100%);
+            background: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -26,35 +26,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Animated background particles */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background:
-                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
-            animation: float 20s ease-in-out infinite;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-
-            33% {
-                transform: translate(30px, -30px) rotate(120deg);
-            }
-
-            66% {
-                transform: translate(-20px, 20px) rotate(240deg);
-            }
-        }
-
         .container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
@@ -63,67 +34,34 @@
             max-width: 400px;
             border-radius: 30px;
             box-shadow:
-                0 30px 90px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+                0 10px 40px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(0, 0, 0, 0.05) inset;
             text-align: center;
             position: relative;
             z-index: 1;
-            animation: slideIn 0.6s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
         }
 
         .icon-wrapper {
             width: 90px;
             height: 90px;
-            background: linear-gradient(135deg, #D1B06C 0%, #061E48 100%);
+            background: transparent;
             border-radius: 50%;
             margin: 0 auto 25px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            box-shadow: 0 15px 35px rgba(209, 176, 108, 0.4);
-            animation: iconPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes iconPulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-                box-shadow: 0 15px 35px rgba(209, 176, 108, 0.4);
-            }
-
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 20px 45px rgba(209, 176, 108, 0.6);
-            }
         }
 
         .icon-wrapper img {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             object-fit: contain;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
         }
 
         h1 {
             font-size: 28px;
-            background: linear-gradient(135deg, #061E48 0%, #D1B06C 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #061E48;
             margin-bottom: 10px;
             font-weight: 800;
             letter-spacing: -0.5px;
@@ -232,8 +170,7 @@
 
     <div class="container">
         <div class="icon-wrapper">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Logo_Badan_Gizi_Nasional_%282024%29.png"
-                alt="Logo">
+            <img src="{{ asset('img/bgn.svg') }}" alt="Logo">
         </div>
 
         <h1>Login Absensi</h1>
