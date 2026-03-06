@@ -7,6 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
     <style>
         * {
             margin: 0;
@@ -227,6 +234,19 @@
             box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
         }
 
+        .btn-checkout {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-done {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(100, 116, 139, 0.3);
+            cursor: not-allowed;
+        }
+
         /* Location Info */
         .location-card {
             background: white;
@@ -280,6 +300,17 @@
         /* Add Canvas for Logic but hide from UI */
         #canvas {
             display: none;
+        }
+
+        /* Minimap Container */
+        #map {
+            width: 100%;
+            height: 250px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            margin-top: -10px;
+            z-index: 1;
+            /* Keep map behind sticky header */
         }
 
         /* Overlay Loading */
@@ -379,10 +410,22 @@
 
         <div id="error-message" class="alert-error"></div>
 
+        <div id="map"></div>
+
         <div class="camera-container" style="background: transparent; box-shadow: none; padding: 0;">
+            @if($attendanceStatus === 'none')
             <button id="btn-submit-att" class="btn btn-submit"
-                style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: none;">Check
-                In/Out</button>
+                style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: none;">Check In
+                (Masuk)</button>
+            @elseif($attendanceStatus === 'in')
+            <button id="btn-submit-att" class="btn btn-checkout"
+                style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: none;">Check Out
+                (Pulang)</button>
+            @elseif($attendanceStatus === 'done')
+            <button id="btn-submit-att" class="btn btn-done" disabled
+                style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: block;">Sudah Absen
+                Masuk & Pulang</button>
+            @endif
         </div>
     </main>
 
@@ -392,6 +435,9 @@
     </div>
 
     <!-- Script Kamera dan Geo -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btnSubmit = document.getElementById('btn-submit-att');
@@ -402,6 +448,32 @@
 
             let currentLat = null;
             let currentLng = null;
+
+            // Inisialisasi Peta Leaflet
+            let settingLat = @json($setting ? $setting -> latitude : null);
+            let settingLng = @json($setting ? $setting -> longitude : null);
+            let settingRadius = @json($setting ? $setting -> radius : null);
+
+            const map = L.map('map').setView([settingLat || -6.200000, settingLng || 106.816666], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            let userMarker = null;
+            let officeCircle = null;
+            let officeMarker = null;
+
+            if (settingLat !== null && settingLng !== null) {
+                officeMarker = L.marker([settingLat, settingLng]).addTo(map).bindPopup("Lokasi Kantor");
+                if (settingRadius !== null) {
+                    officeCircle = L.circle([settingLat, settingLng], {
+                        color: '#0284c7',
+                        fillColor: '#0284c7',
+                        fillOpacity: 0.1,
+                        radius: settingRadius
+                    }).addTo(map);
+                }
+            }
 
             // Helper to compute distance in meters
             function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -427,10 +499,6 @@
                             currentLat = position.coords.latitude;
                             currentLng = position.coords.longitude;
 
-                            let settingLat = @json($setting ? $setting -> latitude : null);
-                            let settingLng = @json($setting ? $setting -> longitude : null);
-                            let settingRadius = @json($setting ? $setting -> radius : null);
-
                             if (settingLat !== null && settingLng !== null && settingRadius !== null) {
                                 const dist = calculateDistance(settingLat, settingLng, currentLat, currentLng);
                                 if (dist <= settingRadius) {
@@ -447,8 +515,33 @@
 
                             locCoords.textContent = `${currentLat.toFixed(5)}, ${currentLng.toFixed(5)}`;
 
-                            // Tampilkan tombol submit setelah lokasi didapat
-                            btnSubmit.style.display = 'block';
+                            // Update User Marker
+                            if (!userMarker) {
+                                userMarker = L.marker([currentLat, currentLng], {
+                                    icon: L.icon({
+                                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                                        iconSize: [25, 41],
+                                        iconAnchor: [12, 41],
+                                        popupAnchor: [1, -34],
+                                        shadowSize: [41, 41]
+                                    })
+                                }).addTo(map).bindPopup("Lokasi Anda").openPopup();
+                            } else {
+                                userMarker.setLatLng([currentLat, currentLng]);
+                            }
+
+                            // Sesuaikan Tampilan Peta
+                            if (officeCircle) {
+                                map.fitBounds(officeCircle.getBounds().extend(userMarker.getLatLng()), { padding: [20, 20] });
+                            } else {
+                                map.setView([currentLat, currentLng], 17);
+                            }
+
+                            // Tampilkan tombol submit setelah lokasi didapat (hanya jika belum full absen)
+                            @if ($attendanceStatus !== 'done')
+                                btnSubmit.style.display = 'block';
+                            @endif
                         },
                         (error) => {
                             let msg = 'Gagal akses lokasi';
@@ -479,6 +572,8 @@
 
             // SUBMIT ABSENSI
             btnSubmit.addEventListener('click', async () => {
+                if (btnSubmit.disabled) return;
+
                 if (!currentLat || !currentLng) {
                     showError('Data lokasi belum ditemukan.');
                     return;
@@ -508,16 +603,32 @@
                     loader.classList.remove('show');
 
                     if (response.ok && data.success) {
-                        alert(data.message);
-                        window.location.reload();
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonColor: '#059669'
+                        }).then(() => {
+                            window.location.reload();
+                        });
                     } else {
-                        showError(data.message || 'Gagal mengirim data absensi.');
+                        Swal.fire({
+                            title: 'Gagal',
+                            text: data.message || 'Gagal mengirim data absensi.',
+                            icon: 'error',
+                            confirmButtonColor: '#dc2626'
+                        });
                     }
 
                 } catch (err) {
                     console.error(err);
                     loader.classList.remove('show');
-                    showError('Terjadi kesalahan jaringan.');
+                    Swal.fire({
+                        title: 'Error Jaringan',
+                        text: 'Terjadi kesalahan jaringan.',
+                        icon: 'error',
+                        confirmButtonColor: '#dc2626'
+                    });
                 }
             });
         });

@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Employee;
 use App\Services\AttendanceService;
+use App\Models\Attendance;
 use Carbon\Carbon;
 
 class MobileAttendanceController extends Controller
@@ -31,7 +32,22 @@ class MobileAttendanceController extends Controller
 
         $setting = \App\Models\Setting::first();
 
-        return view('mobile.tap', compact('employee', 'setting'));
+        // Cek absensi hari ini (beradasarkan tanggal saat ini)
+        $todayAttendance = Attendance::where('employee_id', $employee->id)
+            ->whereDate('work_date', Carbon::today())
+            ->first();
+
+        $attendanceStatus = 'none'; // Belum absen masuk
+        if ($todayAttendance) {
+            if ($todayAttendance->check_in_at && !$todayAttendance->check_out_at) {
+                $attendanceStatus = 'in'; // Sudah absen masuk, belum absen pulang
+            }
+            elseif ($todayAttendance->check_in_at && $todayAttendance->check_out_at) {
+                $attendanceStatus = 'done'; // Sudah absen masuk dan pulang
+            }
+        }
+
+        return view('mobile.tap', compact('employee', 'setting', 'attendanceStatus'));
     }
 
     /**
