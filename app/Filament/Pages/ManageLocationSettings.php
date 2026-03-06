@@ -2,17 +2,27 @@
 
 namespace App\Filament\Pages;
 
+use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
-// use Filament\Forms\Components\Section;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use App\Models\Setting;
+use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class ManageLocationSettings extends Page
 {
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-map-pin';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
+
+    protected static ?string $navigationLabel = 'Location Settings';
+
+    protected static ?string $label = 'Location Settings';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 10;
 
     protected string $view = 'filament.pages.manage-location-settings';
 
