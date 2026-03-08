@@ -30,24 +30,48 @@ class AttendanceService
             ->orderBy('check_in_at', 'desc')
             ->first();
 
+        $workDate = $workSchedule->determineWorkDate($tappedTime);
+
         /**
-         * 2️⃣ Jika ADA → CHECK-OUT
+         * 2️⃣ Jika ADA → PERIKSA APAKAH INI CHECK-OUT SHIFT INI ATAU SHIFT LALU
          */
         if ($attendance) {
-            $attendance->check_out_at = $tappedTime;
-            $attendance->work_hours = $attendance->calculateWorkHours();
-            $attendance->updateStatus();
+            // Jika hari kerja absen menggantung ini BERBEDA dengan hari kerja tap saat ini, 
+            // artinya ini absen kemarin yang lupa check-out.
+            if ($attendance->work_date->format('Y-m-d') !== $workDate->format('Y-m-d')) {
+                // Auto checkout menggunakan jam pulang yang seharusnya (check_out_time)
+                $scheduledOut = Carbon::parse($workSchedule->check_out_time);
+                $autoOutTime = $attendance->work_date->copy()->setTimeFrom($scheduledOut);
+                
+                // Jika shift malam, check out time di hari berikutnya
+                if ($workSchedule->is_overnight) {
+                    $autoOutTime->addDay();
+                }
 
-            return [
-                'attendance' => $attendance->fresh(),
-                'message' => 'Check-out berhasil',
-            ];
+                $attendance->check_out_at = $autoOutTime;
+                $attendance->notes = 'Auto check-out by system';
+                $attendance->work_hours = $attendance->calculateWorkHours();
+                $attendance->updateStatus();
+
+                // Ubah behavior sistem: Pura-pura absen menggantung ini sudah diurus,
+                // lalu lanjutkan fungsi ke bawah untuk membuat CHECK-IN HARI INI.
+                $attendance = null;
+            } else {
+                // Ini murni valid Check-Out untuk shift/hari ini
+                $attendance->check_out_at = $tappedTime;
+                $attendance->work_hours = $attendance->calculateWorkHours();
+                $attendance->updateStatus();
+
+                return [
+                    'attendance' => $attendance->fresh(),
+                    'message' => 'Check-out berhasil',
+                ];
+            }
         }
 
         /**
          * 3️⃣ Jika TIDAK ADA → CHECK-IN
          */
-        $workDate = $workSchedule->determineWorkDate($tappedTime);
 
         // 🔎 CEK apakah sudah ada attendance di tanggal kerja ini
         $existingAttendance = Attendance::where('employee_id', $employee->id)
@@ -124,26 +148,51 @@ class AttendanceService
             ->orderBy('check_in_at', 'desc')
             ->first();
 
+        $workDate = $workSchedule->determineWorkDate($tappedTime);
+
         /**
-         * 2️⃣ Jika ADA → CHECK-OUT
+         * 2️⃣ Jika ADA → PERIKSA APAKAH INI CHECK-OUT SHIFT INI ATAU SHIFT LALU
          */
         if ($attendance) {
-            $attendance->check_out_at = $tappedTime;
-            $attendance->location_out_lat = $lat;
-            $attendance->location_out_lng = $lng;
-            $attendance->work_hours = $attendance->calculateWorkHours();
-            $attendance->updateStatus();
+            // Jika hari kerja absen menggantung ini BERBEDA dengan hari kerja tap saat ini, 
+            // artinya ini absen kemarin yang lupa check-out.
+            if ($attendance->work_date->format('Y-m-d') !== $workDate->format('Y-m-d')) {
+                // Auto checkout menggunakan jam pulang yang seharusnya (check_out_time)
+                $scheduledOut = Carbon::parse($workSchedule->check_out_time);
+                $autoOutTime = $attendance->work_date->copy()->setTimeFrom($scheduledOut);
 
-            return [
-                'attendance' => $attendance->fresh(),
-                'message' => 'Check-out berhasil',
-            ];
+                // Jika shift malam, check out time di hari berikutnya
+                if ($workSchedule->is_overnight) {
+                    $autoOutTime->addDay();
+                }
+
+                $attendance->check_out_at = $autoOutTime;
+                $attendance->notes = 'Auto check-out by system';
+                $attendance->work_hours = $attendance->calculateWorkHours();
+                $attendance->updateStatus();
+
+                // Ubah behavior sistem: Pura-pura absen menggantung ini sudah diurus,
+                // lalu lanjutkan fungsi ke bawah untuk membuat CHECK-IN HARI INI.
+                $attendance = null;
+            }
+            else {
+                // Ini murni valid Check-Out untuk shift/hari ini
+                $attendance->check_out_at = $tappedTime;
+                $attendance->location_out_lat = $lat;
+                $attendance->location_out_lng = $lng;
+                $attendance->work_hours = $attendance->calculateWorkHours();
+                $attendance->updateStatus();
+
+                return [
+                    'attendance' => $attendance->fresh(),
+                    'message' => 'Check-out berhasil',
+                ];
+            }
         }
 
         /**
          * 3️⃣ Jika TIDAK ADA → CHECK-IN
          */
-        $workDate = $workSchedule->determineWorkDate($tappedTime);
 
         // 🔎 CEK apakah sudah ada attendance di tanggal kerja ini
         $existingAttendance = Attendance::where('employee_id', $employee->id)
