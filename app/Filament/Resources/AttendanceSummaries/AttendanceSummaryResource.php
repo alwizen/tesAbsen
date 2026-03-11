@@ -5,11 +5,7 @@ namespace App\Filament\Resources\AttendanceSummaries;
 use App\Filament\Resources\AttendanceSummaries\Pages\ManageAttendanceSummaries;
 use App\Models\AttendanceSummary;
 use BackedEnum;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
+
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
@@ -23,6 +19,10 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Carbon\Carbon;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 
 class AttendanceSummaryResource extends Resource
 {
@@ -487,15 +487,13 @@ class AttendanceSummaryResource extends Resource
                     ->searchable()
                     ->preload(),
             ])
-            ->actions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+            ->recordActions([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
             ])
-            ->bulkActions([
-                BulkActionGroup::make([
+            ->toolbarActions([
                     DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
