@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Tap Kartu RFID</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('img/bgn.svg') }}">
 
     <style>
         * {
@@ -557,13 +558,13 @@
 
         modalClose.addEventListener('click', hideModal);
 
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === modal) {
                 hideModal();
             }
         });
 
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             e.preventDefault();
 
             const rfid = input.value.trim();
@@ -573,16 +574,16 @@
             input.disabled = true;
 
             fetch('/api/attendance/tap', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        rfid_number: rfid
-                    })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    rfid_number: rfid
                 })
+            })
                 .then(res => res.json())
                 .then(data => {
                     loading.classList.remove('show');
@@ -601,7 +602,7 @@
                 });
         });
 
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && modal.classList.contains('show')) {
                 hideModal();
             }

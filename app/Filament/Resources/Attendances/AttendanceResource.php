@@ -5,9 +5,11 @@ namespace App\Filament\Resources\Attendances;
 use App\Filament\Resources\Attendances\Pages\ManageAttendances;
 use App\Models\Attendance;
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
-// use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
@@ -267,11 +269,14 @@ class AttendanceResource extends Resource
                     ->toggle(),
             ])
             ->defaultSort('work_date', 'desc')
-            // ->recordActions([
-            //     ViewAction::make(),
-            //     EditAction::make(),
-            //     DeleteAction::make(),
-            // ])
+             ->recordActions([
+                ActionGroup::make([
+                    // Action::make('view')
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     ExportBulkAction::make(),

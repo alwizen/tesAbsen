@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>Slip Gaji - {{ $employee->name }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('img/bgn.svg') }}">
     <style>
         * {
             box-sizing: border-box;
@@ -217,27 +218,27 @@
 <body>
 
     @php
-        $baseSalary = (int) ($detail->base_salary ?? 0);
-        $allowances = (int) ($detail->allowances ?? 0);
-        $bonuses = (int) ($detail->bonuses ?? 0);
-        $lateDeduction = (int) ($detail->late_deduction ?? 0);
-        $otherDeductions = (int) ($detail->other_deductions ?? 0);
-        $netSalary = (int) ($detail->net_salary ?? 0);
+    $baseSalary = (int) ($detail->base_salary ?? 0);
+    $allowances = (int) ($detail->allowances ?? 0);
+    $bonuses = (int) ($detail->bonuses ?? 0);
+    $lateDeduction = (int) ($detail->late_deduction ?? 0);
+    $otherDeductions = (int) ($detail->other_deductions ?? 0);
+    $netSalary = (int) ($detail->net_salary ?? 0);
 
-        $workDays = (int) ($detail->total_work_days ?? 0);
-        $workHours = (float) ($detail->total_work_hours ?? 0);
-        $lateMinutes = (int) ($detail->total_late_minutes ?? 0);
+    $workDays = (int) ($detail->total_work_days ?? 0);
+    $workHours = (float) ($detail->total_work_hours ?? 0);
+    $lateMinutes = (int) ($detail->total_late_minutes ?? 0);
 
-        $dailyRate = (int) ($detail->daily_rate ?? 0);
-        $hourlyRate = (int) ($detail->hourly_rate ?? 0);
-        $salaryType = $department->salary_type ?? 'daily';
+    $dailyRate = (int) ($detail->daily_rate ?? 0);
+    $hourlyRate = (int) ($detail->hourly_rate ?? 0);
+    $salaryType = $department->salary_type ?? 'daily';
 
-        $periodeText =
-            \Carbon\Carbon::parse($payroll->period_start)->translatedFormat('d F Y') .
-            ' – ' .
-            \Carbon\Carbon::parse($payroll->period_end)->translatedFormat('d F Y');
+    $periodeText =
+    \Carbon\Carbon::parse($payroll->period_start)->translatedFormat('d F Y') .
+    ' – ' .
+    \Carbon\Carbon::parse($payroll->period_end)->translatedFormat('d F Y');
 
-        $tanggalCetak = $tanggal_cetak ?? now()->translatedFormat('d F Y');
+    $tanggalCetak = $tanggal_cetak ?? now()->translatedFormat('d F Y');
     @endphp
 
     {{-- Tombol print --}}
@@ -295,10 +296,10 @@
                     <td>
                         Hari Masuk × Tarif
                         @if ($salaryType === 'daily')
-                            ({{ $workDays }} hr × Rp {{ number_format($dailyRate, 0, ',', '.') }})
+                        ({{ $workDays }} hr × Rp {{ number_format($dailyRate, 0, ',', '.') }})
                         @else
-                            ({{ number_format($workHours, 1, ',', '.') }} jam × Rp
-                            {{ number_format($hourlyRate, 0, ',', '.') }})
+                        ({{ number_format($workHours, 1, ',', '.') }} jam × Rp
+                        {{ number_format($hourlyRate, 0, ',', '.') }})
                         @endif
                     </td>
                     <td class="amount">Rp {{ number_format($baseSalary, 0, ',', '.') }}</td>
@@ -306,42 +307,42 @@
 
                 {{-- Pendapatan tambahan --}}
                 @if ($allowances > 0 || $bonuses > 0)
-                    <tr class="sec-row">
-                        <td colspan="2">Tambahan</td>
-                    </tr>
-                    @if ($allowances > 0)
-                        <tr>
-                            <td>Tunjangan</td>
-                            <td class="amount text-success">+ Rp {{ number_format($allowances, 0, ',', '.') }}</td>
-                        </tr>
-                    @endif
-                    @if ($bonuses > 0)
-                        <tr>
-                            <td>Bonus / PJ</td>
-                            <td class="amount text-success">+ Rp {{ number_format($bonuses, 0, ',', '.') }}</td>
-                        </tr>
-                    @endif
+                <tr class="sec-row">
+                    <td colspan="2">Tambahan</td>
+                </tr>
+                @if ($allowances > 0)
+                <tr>
+                    <td>Tunjangan</td>
+                    <td class="amount text-success">+ Rp {{ number_format($allowances, 0, ',', '.') }}</td>
+                </tr>
+                @endif
+                @if ($bonuses > 0)
+                <tr>
+                    <td>Bonus / PJ</td>
+                    <td class="amount text-success">+ Rp {{ number_format($bonuses, 0, ',', '.') }}</td>
+                </tr>
+                @endif
                 @endif
 
                 {{-- Potongan --}}
                 @if ($lateDeduction > 0 || $otherDeductions > 0)
-                    <tr class="sec-row">
-                        <td colspan="2">Potongan</td>
-                    </tr>
-                    @if ($lateDeduction > 0)
-                        <tr>
-                            <td class="text-danger">
-                                Keterlambatan{{ $lateMinutes > 0 ? ' (' . $lateMinutes . ' mnt)' : '' }}
-                            </td>
-                            <td class="amount text-danger">- Rp {{ number_format($lateDeduction, 0, ',', '.') }}</td>
-                        </tr>
-                    @endif
-                    @if ($otherDeductions > 0)
-                        <tr>
-                            <td class="text-danger">Lainnya (Cashbon, dll)</td>
-                            <td class="amount text-danger">- Rp {{ number_format($otherDeductions, 0, ',', '.') }}</td>
-                        </tr>
-                    @endif
+                <tr class="sec-row">
+                    <td colspan="2">Potongan</td>
+                </tr>
+                @if ($lateDeduction > 0)
+                <tr>
+                    <td class="text-danger">
+                        Keterlambatan{{ $lateMinutes > 0 ? ' (' . $lateMinutes . ' mnt)' : '' }}
+                    </td>
+                    <td class="amount text-danger">- Rp {{ number_format($lateDeduction, 0, ',', '.') }}</td>
+                </tr>
+                @endif
+                @if ($otherDeductions > 0)
+                <tr>
+                    <td class="text-danger">Lainnya (Cashbon, dll)</td>
+                    <td class="amount text-danger">- Rp {{ number_format($otherDeductions, 0, ',', '.') }}</td>
+                </tr>
+                @endif
                 @endif
 
                 {{-- Total --}}
@@ -354,9 +355,9 @@
 
         {{-- Catatan (jika ada) --}}
         @if (!empty($detail->calculation_notes))
-            <div style="font-size:8px; margin-top:5px; color:#555;">
-                <strong>Catatan:</strong> {{ $detail->calculation_notes }}
-            </div>
+        <div style="font-size:8px; margin-top:5px; color:#555;">
+            <strong>Catatan:</strong> {{ $detail->calculation_notes }}
+        </div>
         @endif
 
         {{-- TANDA TANGAN --}}

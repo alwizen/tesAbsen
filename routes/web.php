@@ -11,12 +11,12 @@ use App\Http\Controllers\MobileAttendanceController;
 Route::view('/tap', 'attendance.tap');
 
 // Mobile Web Routes
-Route::get('/mobile/login', [MobileAuthController::class , 'loginView'])->name('mobile.login');
-Route::post('/mobile/login', [MobileAuthController::class , 'login']);
-Route::post('/mobile/logout', [MobileAuthController::class , 'logout'])->name('mobile.logout');
+Route::get('/m/login', [MobileAuthController::class , 'loginView'])->name('mobile.login');
+Route::post('/m/login', [MobileAuthController::class , 'login']);
+Route::post('/m/logout', [MobileAuthController::class , 'logout'])->name('mobile.logout');
 
 Route::middleware([\App\Http\Middleware\CheckEmployeeSession::class])->group(function () {
-    Route::get('/mobile/tap', [MobileAttendanceController::class , 'mobileTapView'])->name('mobile.tap');
+    Route::get('/m/tap', [MobileAttendanceController::class , 'mobileTapView'])->name('mobile.tap');
     Route::post('/api/attendance/mobile-tap', [MobileAttendanceController::class , 'mobileTap']);
 });
 
