@@ -27,6 +27,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use pxlrbt\FilamentExcel\Actions\ExportBulkAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use UnitEnum;
 
 class AttendanceResource extends Resource
@@ -119,49 +120,96 @@ class AttendanceResource extends Resource
                 TextColumn::make('location_in')
                     ->label('Lokasi Masuk')
                     ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->getStateUsing(fn (Attendance $record) => $record->location_in_lat && $record->location_in_lng ? "Lokasi" : '-')
-                    ->url(fn (Attendance $record) => $record->location_in_lat && $record->location_in_lng ? "https://maps.google.com/?q={$record->location_in_lat},{$record->location_in_lng}" : null)
+                    ->getStateUsing(function (Attendance $record) {
+                        if (!$record->location_in_lat || !$record->location_in_lng) return '-';
+
+                        $setting = \App\Models\Setting::first();
+                        if (!$setting?->latitude || !$setting?->longitude || !$setting?->radius) {
+                            return 'Lokasi';
+                        }
+
+                        $earthRadius = 6371000;
+                        $latDelta = deg2rad($record->location_in_lat - $setting->latitude);
+                        $lonDelta = deg2rad($record->location_in_lng - $setting->longitude);
+                        $a = sin($latDelta / 2) ** 2 +
+                            cos(deg2rad($setting->latitude)) * cos(deg2rad($record->location_in_lat)) *
+                            sin($lonDelta / 2) ** 2;
+                        $distance = $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+                        return $distance <= $setting->radius ? 'Lokasi (on site)' : 'Lokasi (diluar radius)';
+                    })
+                    ->url(fn(Attendance $record) => $record->location_in_lat && $record->location_in_lng
+                        ? "https://maps.google.com/?q={$record->location_in_lat},{$record->location_in_lng}"
+                        : null)
                     ->openUrlInNewTab()
-                    ->color('info'),
+                    ->color(fn(string $state): string => match ($state) {
+                        'Lokasi (on site)' => 'success',
+                        'Lokasi (diluar radius)' => 'danger',
+                        default => 'gray',
+                    }),
+
                 TextColumn::make('location_out')
                     ->label('Lokasi Keluar')
                     ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->getStateUsing(fn (Attendance $record) => $record->location_out_lat && $record->location_out_lng ? "Lokasi" : '-')
-                    ->url(fn (Attendance $record) => $record->location_out_lat && $record->location_out_lng ? "https://maps.google.com/?q={$record->location_out_lat},{$record->location_out_lng}" : null)
-                    ->openUrlInNewTab()
-                    ->color('warning'),
-                TextColumn::make('radius')
-                    ->label('Radius')
                     ->getStateUsing(function (Attendance $record) {
+                        if (!$record->location_out_lat || !$record->location_out_lng) return '-';
+
                         $setting = \App\Models\Setting::first();
-                        if (!$setting || !$setting->latitude || !$setting->longitude || !$setting->radius) {
-                            return '-';
+                        if (!$setting?->latitude || !$setting?->longitude || !$setting?->radius) {
+                            return 'Lokasi';
                         }
-                        
-                        $lat = $record->location_in_lat ?? $record->location_out_lat;
-                        $lng = $record->location_in_lng ?? $record->location_out_lng;
-                        
-                        if (!$lat || !$lng) return '-';
-                        
-                        // Haversine distance
+
                         $earthRadius = 6371000;
-                        $latDelta = deg2rad($lat - $setting->latitude);
-                        $lonDelta = deg2rad($lng - $setting->longitude);
-                        
-                        $a = sin($latDelta / 2) * sin($latDelta / 2) +
-                             cos(deg2rad($setting->latitude)) * cos(deg2rad($lat)) *
-                             sin($lonDelta / 2) * sin($lonDelta / 2);
-                        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-                        $distance = $earthRadius * $c;
-                        
-                        return $distance <= $setting->radius ? 'on site' : 'diluar radius';
+                        $latDelta = deg2rad($record->location_out_lat - $setting->latitude);
+                        $lonDelta = deg2rad($record->location_out_lng - $setting->longitude);
+                        $a = sin($latDelta / 2) ** 2 +
+                            cos(deg2rad($setting->latitude)) * cos(deg2rad($record->location_out_lat)) *
+                            sin($lonDelta / 2) ** 2;
+                        $distance = $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+                        return $distance <= $setting->radius ? 'Lokasi (on site)' : 'Lokasi (diluar radius)';
                     })
-                    ->badge()
+                    ->url(fn(Attendance $record) => $record->location_out_lat && $record->location_out_lng
+                        ? "https://maps.google.com/?q={$record->location_out_lat},{$record->location_out_lng}"
+                        : null)
+                    ->openUrlInNewTab()
                     ->color(fn(string $state): string => match ($state) {
-                        'on site' => 'success',
-                        'diluar radius' => 'danger',
+                        'Lokasi (on site)' => 'success',
+                        'Lokasi (diluar radius)' => 'danger',
                         default => 'gray',
                     }),
+                // TextColumn::make('radius')
+                //     ->label('Radius')
+                //     ->getStateUsing(function (Attendance $record) {
+                //         $setting = \App\Models\Setting::first();
+                //         if (!$setting || !$setting->latitude || !$setting->longitude || !$setting->radius) {
+                //             return '-';
+                //         }
+
+                //         $lat = $record->location_in_lat ?? $record->location_out_lat;
+                //         $lng = $record->location_in_lng ?? $record->location_out_lng;
+
+                //         if (!$lat || !$lng) return '-';
+
+                //         // Haversine distance
+                //         $earthRadius = 6371000;
+                //         $latDelta = deg2rad($lat - $setting->latitude);
+                //         $lonDelta = deg2rad($lng - $setting->longitude);
+
+                //         $a = sin($latDelta / 2) * sin($latDelta / 2) +
+                //             cos(deg2rad($setting->latitude)) * cos(deg2rad($lat)) *
+                //             sin($lonDelta / 2) * sin($lonDelta / 2);
+                //         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+                //         $distance = $earthRadius * $c;
+
+                //         return $distance <= $setting->radius ? 'on site' : 'diluar radius';
+                //     })
+                //     ->badge()
+                //     ->color(fn(string $state): string => match ($state) {
+                //         'on site' => 'success',
+                //         'diluar radius' => 'danger',
+                //         default => 'gray',
+                //     }),
                 TextColumn::make('late_minutes')
                     ->label('Terlambat')
                     ->formatStateUsing(function ($state) {
@@ -269,7 +317,7 @@ class AttendanceResource extends Resource
                     ->toggle(),
             ])
             ->defaultSort('work_date', 'desc')
-             ->recordActions([
+            ->recordActions([
                 ActionGroup::make([
                     // Action::make('view')
                     ViewAction::make(),
@@ -279,8 +327,40 @@ class AttendanceResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    ExportBulkAction::make(),
-                    // DeleteBulkAction::make(),
+                    ExportBulkAction::make()
+                        ->exports([
+                            ExcelExport::make()
+                                ->fromModel()
+                                // ->withFilename(fn() => 'rekap-absensi-' . date('d-m-Y'))
+                                ->withColumns([
+                                    \pxlrbt\FilamentExcel\Columns\Column::make('employee.name')
+                                        ->heading('Nama Lengkap'),
+                                    \pxlrbt\FilamentExcel\Columns\Column::make('work_date')
+                                        ->heading('Tanggal Kerja')
+                                        ->formatStateUsing(fn($state) => $state?->format('d/m/Y')),
+                                    \pxlrbt\FilamentExcel\Columns\Column::make('check_in_at')
+                                        ->heading('Masuk')
+                                        ->formatStateUsing(fn($state) => $state?->format('d/m/Y H:i')),
+                                    \pxlrbt\FilamentExcel\Columns\Column::make('check_out_at')
+                                        ->heading('Keluar')
+                                        ->formatStateUsing(fn($state) => $state?->format('d/m/Y H:i')),
+                                    \pxlrbt\FilamentExcel\Columns\Column::make('late_minutes')
+                                        ->heading('Terlambat (menit)'),
+                                    \pxlrbt\FilamentExcel\Columns\Column::make('work_hours')
+                                        ->heading('Jam Kerja'),
+                                    \pxlrbt\FilamentExcel\Columns\Column::make('status')
+                                        ->heading('Status')
+                                        ->formatStateUsing(fn($state) => match ($state) {
+                                            'present' => 'Hadir',
+                                            'late' => 'Terlambat',
+                                            'absent' => 'Tidak Hadir',
+                                            'incomplete' => 'Belum Lengkap',
+                                            default => $state,
+                                        }),
+                                    \pxlrbt\FilamentExcel\Columns\Column::make('notes')
+                                        ->heading('Catatan'),
+                                ]),
+                        ]),
                 ]),
             ]);
     }
