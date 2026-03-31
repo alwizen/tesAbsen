@@ -42,21 +42,27 @@ class WorkScheduleResource extends Resource
             ->components([
                 Select::make('department_id')
                     ->relationship('department', 'name')
-                    ->required(),
+                    ->required()
+                    ->label('Department'),
                 TimePicker::make('check_in_time')
-                    ->required(),
+                    ->required()
+                    ->label('Jam Masuk'),
                 TimePicker::make('check_out_time')
-                    ->required(),
+                    ->required()
+                    ->label('Jam Keluar'),
                 TextInput::make('grace_period_minutes')
                     ->required()
                     ->numeric()
-                    ->default(0),
+                    ->default(0)
+                    ->label('Toleransi (menit)'),
                 Toggle::make('is_overnight')
-                    ->required(),
+                    ->required()
+                    ->label('Melewati Malam'),
                 TextInput::make('max_work_hours')
                     ->required()
                     ->numeric()
-                    ->default(8),
+                    ->default(8)
+                    ->label('Max Jam Kerja'),
                 Toggle::make('is_active')
                     ->required(),
             ]);
@@ -69,17 +75,23 @@ class WorkScheduleResource extends Resource
                 TextEntry::make('department.name')
                     ->label('Department'),
                 TextEntry::make('check_in_time')
-                    ->time(),
+                    ->time()
+                    ->label('Jam Masuk'),
                 TextEntry::make('check_out_time')
-                    ->time(),
+                    ->time()
+                    ->label('Jam Keluar'),
                 TextEntry::make('grace_period_minutes')
-                    ->numeric(),
+                    ->numeric()
+                    ->label('Toleransi (menit)'),
                 IconEntry::make('is_overnight')
-                    ->boolean(),
+                    ->boolean()
+                    ->label('Melewati Malam'),
                 TextEntry::make('max_work_hours')
-                    ->numeric(),
+                    ->numeric()
+                    ->label('Max Jam Kerja'),
                 IconEntry::make('is_active')
-                    ->boolean(),
+                    ->boolean()
+                    ->label('Aktif'),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),
@@ -94,23 +106,30 @@ class WorkScheduleResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('department.name')
-                    ->searchable(),
+                    ->searchable()
+                    ->label('Department'),
                 TextColumn::make('check_in_time')
                     ->time()
+                    ->label('Jam Masuk')
                     ->sortable(),
                 TextColumn::make('check_out_time')
                     ->time()
+                    ->label('Jam Keluar')
                     ->sortable(),
                 TextColumn::make('grace_period_minutes')
                     ->numeric()
+                    ->label('Toleransi (menit)')
                     ->sortable(),
                 IconColumn::make('is_overnight')
-                    ->boolean(),
+                    ->boolean()
+                    ->label('Melewati Malam'),
                 TextColumn::make('max_work_hours')
                     ->numeric()
+                    ->label('Max Jam Kerja')
                     ->sortable(),
                 IconColumn::make('is_active')
-                    ->boolean(),
+                    ->boolean()
+                    ->label('Aktif'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

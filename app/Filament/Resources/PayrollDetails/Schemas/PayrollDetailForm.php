@@ -181,7 +181,16 @@ class PayrollDetailForm
                             ->numeric()
                             ->default(0)
                             ->minValue(0)
-                            ->suffix('hari'),
+                            ->suffix('hari')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                $salaryType = $get('salary_type');
+                                if ($salaryType === 'daily') {
+                                    $baseSalary = ((float) $get('daily_rate') ?? 0) * (float) $state;
+                                    $set('base_salary', round($baseSalary));
+                                    self::recalculateNetSalary($set, $get);
+                                }
+                            }),
 
                         TextInput::make('total_work_hours')
                             ->label('Total Jam Kerja')
@@ -190,8 +199,16 @@ class PayrollDetailForm
                             ->minValue(0)
                             ->step(0.01)
                             ->suffix('jam')
-                            ->readOnly()
-                            ->dehydrated(), // Tetap disimpan meski readonly
+                            ->dehydrated()
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                $salaryType = $get('salary_type');
+                                if ($salaryType === 'hourly') {
+                                    $baseSalary = ((float) $get('hourly_rate') ?? 0) * (float) $state;
+                                    $set('base_salary', round($baseSalary));
+                                    self::recalculateNetSalary($set, $get);
+                                }
+                            }),
 
                         // TextInput::make('total_late_minutes')
                         //     ->label('Total Terlambat')

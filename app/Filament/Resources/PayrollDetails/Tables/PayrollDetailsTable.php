@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PayrollDetails\Tables;
 
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -105,6 +106,12 @@ class PayrollDetailsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkAction::make('cetak_bulk_slip')
+                        ->label('Cetak Terpilih')
+                        ->icon('heroicon-o-printer')
+                        ->color('success')
+                        ->url(fn($records) => route('payroll.bulk-slip', ['ids' => $records->pluck('id')->join(',')]))
+                        ->openUrlInNewTab(),
                     DeleteBulkAction::make(),
                 ]),
             ]);

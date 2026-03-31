@@ -25,6 +25,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Carbon\Carbon;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use UnitEnum;
@@ -194,9 +195,9 @@ class PayrollResource extends Resource
                             ->dateTime('d F Y, H:i')
                             ->placeholder('-'),
 
-                        TextEntry::make('processedBy.name')
-                            ->label('Diproses Oleh')
-                            ->placeholder('-'),
+                        // TextEntry::make('processedBy.name')
+                        //     ->label('Diproses Oleh')
+                        //     ->placeholder('-'),
                     ]),
 
                 Section::make('Catatan & Riwayat')
@@ -263,10 +264,10 @@ class PayrollResource extends Resource
                         default => $state,
                     }),
 
-                TextColumn::make('processedBy.name')
-                    ->label('Diproses Oleh')
-                    ->placeholder('-')
-                    ->toggleable(),
+                // TextColumn::make('processedBy.name')
+                //     ->label('Diproses Oleh')
+                //     ->placeholder('-')
+                //     ->toggleable(),
 
                 TextColumn::make('processed_at')
                     ->label('Tanggal Proses')
@@ -283,11 +284,6 @@ class PayrollResource extends Resource
             ->defaultSort('year', 'desc')
             ->defaultSort('month', 'desc')
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make()
-                    ->visible(fn($record) => $record->status === 'draft'),
-                DeleteAction::make()
-                    ->visible(fn($record) => $record->status === 'draft'),
                 Action::make('changeStatus')
                     ->label('Ubah Status')
                     ->icon('heroicon-o-arrow-path')
@@ -308,6 +304,21 @@ class PayrollResource extends Resource
                             'status' => $data['status'],
                         ]);
                     }),
+               ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make()
+                        ->visible(fn($record) => $record->status !== 'paid')
+                        ->disabled(fn($record) => $record->status === 'cancelled'),
+                    DeleteAction::make()
+                        ->visible(fn($record) => $record->status === 'draft')
+                        ->before(function ($record) {
+                            if ($record->status !== 'draft') {
+                                return false;
+                            }
+                            return true;
+                        }),
+                ])
+                ->icon('heroicon-o-paper-clip'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -24,6 +24,10 @@ Route::get('/payroll/slip/{payrollDetail}', [PayrollSlipController::class , 'sho
     ->name('payroll.slip')
     ->middleware(['auth']);
 
+Route::get('/payroll/bulk-slip', [PayrollSlipController::class, 'bulkShow'])
+    ->name('payroll.bulk-slip')
+    ->middleware(['auth']);
+
 // Route::get('/debug-work-date', function () {
 //     $schedule = WorkSchedule::where('is_active', true)->first();
 
