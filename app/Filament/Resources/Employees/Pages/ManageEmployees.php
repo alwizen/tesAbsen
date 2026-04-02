@@ -13,6 +13,8 @@ class ManageEmployees extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
+            \EightyNine\ExcelImport\ExcelImportAction::make()
+                ->color("primary"),
             CreateAction::make(),
         ];
     }

@@ -35,6 +35,19 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
+        // --- Aslap ---
+        $aslap = Department::create([
+            'name' => 'Asisten Lapangan',
+            'code' => 'ASLAP-01',
+            'description' => 'Asisten Lapangan',
+            'is_active' => true,
+            'salary_type' => 'daily',
+            'daily_rate' => 200000,
+            'hourly_rate' => 0,
+            'allowance' => 25000,
+            'pj_allowance' => 0,
+        ]);
+
         // --- Ahli Gizi ---
         $ahliGizi = Department::create([
             'name' => 'Ahli Gizi',
