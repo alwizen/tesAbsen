@@ -11,6 +11,7 @@ use App\Http\Controllers\MobileAttendanceController;
 Route::view('/tap', 'attendance.tap');
 
 // Mobile Web Routes
+Route::redirect('/m', '/m/login');
 Route::get('/m/login', [MobileAuthController::class , 'loginView'])->name('mobile.login');
 Route::post('/m/login', [MobileAuthController::class , 'login']);
 Route::post('/m/logout', [MobileAuthController::class , 'logout'])->name('mobile.logout');

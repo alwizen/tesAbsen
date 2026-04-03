@@ -384,9 +384,9 @@
             <span class="header-title">Absensi Mobile</span>
             <span class="header-subtitle">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</span>
         </div>
-        <form action="{{ route('mobile.logout') }}" method="POST">
+        <form action="{{ route('mobile.logout') }}" method="POST" id="logout-form">
             @csrf
-            <button type="submit" class="btn-logout">Logout</button>
+            <button type="button" class="btn-logout" onclick="confirmLogout()">Logout</button>
         </form>
     </header>
 
@@ -444,6 +444,23 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
+        function confirmLogout() {
+            Swal.fire({
+                title: 'Konfirmasi Logout',
+                text: 'Apakah Anda yakin ingin keluar?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Logout!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form').submit();
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const btnSubmit = document.getElementById('btn-submit-att');
             const locStatus = document.getElementById('loc-status');

@@ -12,6 +12,9 @@ class MobileAuthController extends Controller
      */
     public function loginView()
     {
+        if (session()->has('employee_id')) {
+            return redirect()->route('mobile.tap');
+        }
         return view('mobile.login');
     }
 
