@@ -64,15 +64,28 @@ class DepartmentResource extends Resource
                     ->options([
                         'daily' => 'Harian',
                         'hourly' => 'Per Jam',
-                    ]),
+                    ])
+                    ->default('daily')
+                    ->required()
+                    ->live(onBlur: true),
                 TextInput::make('daily_rate')
-                    ->label('Gaji Harian'),
+                    ->label('Gaji Harian')
+                    ->required()
+                    ->numeric()
+                    ->default(0)
+                    ->hidden(fn(Get $get): bool => $get('salary_type') === 'hourly'),
                 TextInput::make('hourly_rate')
-                    ->label('Gaji Per Jam'),
+                    ->label('Gaji Per Jam')
+                    ->required()
+                    ->numeric()
+                    ->default(0)
+                    ->hidden(fn(Get $get): bool => $get('salary_type') === 'daily'),
                 TextInput::make('allowance')
-                    ->label('Tunjangan'),
+                    ->label('Tunjangan')
+                    ->default(0),
                 TextInput::make('pj_allowance')
-                    ->label('Tunjangan PJ'),
+                    ->label('Tunjangan PJ')
+                    ->default(0),
                 Toggle::make('is_active')
                     ->required()
                     ->default(true),

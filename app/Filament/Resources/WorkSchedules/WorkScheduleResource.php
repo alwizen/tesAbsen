@@ -64,7 +64,8 @@ class WorkScheduleResource extends Resource
                     ->default(8)
                     ->label('Max Jam Kerja'),
                 Toggle::make('is_active')
-                    ->required(),
+                    ->required()
+                    ->default(true),
             ]);
     }
 

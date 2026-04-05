@@ -10,6 +10,8 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
 // use Filament\Support\Colors\Color;
 use Openplain\FilamentShadcnTheme\Color;
 use Filament\Widgets\AccountWidget;
@@ -45,6 +47,10 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => Blade::render('<link rel="apple-touch-icon" href="{{ asset(\'img/apple-touch-icon.png\') }}"><link rel="manifest" href="/manifest.json">')
+            )
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 // AttendanceWidget::class,
