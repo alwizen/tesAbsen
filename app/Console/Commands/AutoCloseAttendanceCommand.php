@@ -20,19 +20,19 @@ class AutoCloseAttendanceCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Automatically close attendances that have been open for more than 18 hours.';
+    protected $description = 'Automatically close attendances that have been open for more than 12 hours.';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $this->info('Checking for incomplete attendances older than 18 hours...');
+        $this->info('Checking for incomplete attendances older than 12 hours...');
 
         $attendances = Attendance::with(['employee.department.activeWorkSchedule'])
             ->whereNull('check_out_at')
             ->whereNotNull('check_in_at')
-            ->where('check_in_at', '<', now()->subHours(18))
+            ->where('check_in_at', '<', now()->subHours(12))
             ->get();
 
         $count = 0;
@@ -77,7 +77,7 @@ class AutoCloseAttendanceCommand extends Command
             
             // Catatan sistem ditambahkan
             $notes = $attendance->notes ? trim($attendance->notes) . "\n" : "";
-            $attendance->notes = $notes . "[Sistem] Check-out otomatis karena >18 jam.";
+            $attendance->notes = $notes . "[Sistem] Check-out otomatis karena >12 jam.";
             
             $attendance->updateStatus();
             

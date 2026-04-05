@@ -36,7 +36,6 @@
                 radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
-            animation: float 20s ease-in-out infinite;
         }
 
         @keyframes float {
@@ -68,7 +67,6 @@
             text-align: center;
             position: relative;
             z-index: 1;
-            animation: slideIn 0.6s ease-out;
         }
 
         @keyframes slideIn {
@@ -94,7 +92,6 @@
             justify-content: center;
             position: relative;
             box-shadow: 0 15px 35px rgba(209, 176, 108, 0.4);
-            animation: iconPulse 3s ease-in-out infinite;
         }
 
         @keyframes iconPulse {
@@ -119,7 +116,6 @@
             border-radius: 50%;
             background: linear-gradient(135deg, #D1B06C 0%, #061E48 100%);
             opacity: 0.3;
-            animation: ripple 2s ease-out infinite;
         }
 
         @keyframes ripple {
@@ -216,7 +212,6 @@
             height: 10px;
             background: linear-gradient(135deg, #10b981, #059669);
             border-radius: 50%;
-            animation: pulseGlow 2s infinite;
             box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
         }
 
@@ -248,7 +243,6 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(8px);
-            animation: fadeIn 0.3s ease;
         }
 
         .modal.show {
@@ -275,7 +269,6 @@
             max-width: 420px;
             text-align: center;
             box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
-            animation: modalBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             position: relative;
         }
 
@@ -304,7 +297,6 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            animation: iconBounce 0.6s ease-out;
         }
 
         @keyframes iconBounce {
@@ -337,7 +329,6 @@
             border-radius: 50%;
             background: inherit;
             opacity: 0.3;
-            animation: modalRipple 1.5s ease-out infinite;
         }
 
         @keyframes modalRipple {
@@ -471,7 +462,7 @@
 
     <div class="container">
         <div class="icon-wrapper">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Logo_Badan_Gizi_Nasional_%282024%29.png"
+            <img src="{{ asset('img/lg.svg') }}"
                 alt="Logo Badan Gizi Nasional">
         </div>
 
@@ -546,7 +537,7 @@
 
             autoCloseTimer = setTimeout(() => {
                 hideModal();
-            }, 1500);
+            }, 800);
         }
 
         function hideModal() {

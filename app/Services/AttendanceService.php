@@ -58,6 +58,10 @@ class AttendanceService
                 $attendance = null;
             } else {
                 // Ini murni valid Check-Out untuk shift/hari ini
+                if ($attendance->check_in_at && $tappedTime->diffInMinutes($attendance->check_in_at) < 5) {
+                    throw new \Exception('Maaf, Anda baru saja absen masuk.');
+                }
+
                 $attendance->check_out_at = $tappedTime;
                 $attendance->work_hours = $attendance->calculateWorkHours();
                 $attendance->updateStatus();
@@ -177,6 +181,10 @@ class AttendanceService
             }
             else {
                 // Ini murni valid Check-Out untuk shift/hari ini
+                if ($attendance->check_in_at && $tappedTime->diffInMinutes($attendance->check_in_at) < 5) {
+                    throw new \Exception('Maaf, Anda baru saja absen masuk.');
+                }
+
                 $attendance->check_out_at = $tappedTime;
                 $attendance->location_out_lat = $lat;
                 $attendance->location_out_lng = $lng;
