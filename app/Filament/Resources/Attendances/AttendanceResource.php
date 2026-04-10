@@ -62,7 +62,13 @@ class AttendanceResource extends Resource
                     ->required()
                     ->numeric()
                     ->default(0),
-                TextInput::make('status')
+                Select::make('status')
+                    ->options([
+                        'present' => 'Hadir',
+                        'late' => 'Terlambat',
+                        'absent' => 'Tidak Hadir',
+                        'incomplete' => 'Tidak Lengkap',
+                    ])
                     ->required()
                     ->default('incomplete'),
                 Textarea::make('notes')
@@ -211,6 +217,7 @@ class AttendanceResource extends Resource
                 //         default => 'gray',
                 //     }),
                 TextColumn::make('late_minutes')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Terlambat')
                     ->formatStateUsing(function ($state) {
                         if ($state == 0) {
@@ -228,7 +235,7 @@ class AttendanceResource extends Resource
                 TextColumn::make('work_hours')
                     ->label('Jam Kerja')
                     ->numeric()
-
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->suffix(' jam')
                     ->color('info'),
                 TextColumn::make('status')
@@ -252,11 +259,9 @@ class AttendanceResource extends Resource
                     }),
                 TextColumn::make('created_at')
                     ->dateTime()
-
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
-
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -311,10 +316,10 @@ class AttendanceResource extends Resource
                         return $indicators;
                     }),
 
-                Filter::make('late')
-                    ->label('Terlambat')
-                    // ->query(fn(Builder $query): Builder => $query->where('late_minutes', '>', 0))
-                    ->toggle(),
+                // Filter::make('late')
+                //     ->label('Terlambat')
+                //     ->query(fn(Builder $query): Builder => $query->where('late_minutes', '>', 0))
+                //     ->toggle(),
             ])
             ->defaultSort('work_date', 'desc')
             ->recordActions([

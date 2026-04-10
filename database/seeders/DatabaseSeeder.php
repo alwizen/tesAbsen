@@ -231,6 +231,18 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
+        // Aslap
+        WorkSchedule::create([
+            'department_id' => $aslap->id,
+            'check_in_time' => '07:00:00',
+            'check_out_time' => '18:00:00',
+            'grace_period_minutes' => 10,
+            'is_overnight' => false,
+            'max_work_hours' => 8,
+            'is_active' => true,
+        ]);
+
+
         // Ahli Gizi
         WorkSchedule::create([
             'department_id' => $ahliGizi->id,
@@ -392,6 +404,16 @@ class DatabaseSeeder extends Seeder
         */
 
         Employee::insert([
+            // Aslap
+            [
+                'rfid_number' => '0001',
+                'employee_number' => 'ASLAP001',
+                'name' => 'Budi Doremi',
+                'department_id' => $aslap->id,
+                'join_date' => '2024-01-01',
+                'is_active' => true,
+                'phone' => '0001',
+            ],
             // Ahli Gizi
             [
                 'rfid_number' => '1',
