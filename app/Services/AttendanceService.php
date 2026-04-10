@@ -42,7 +42,7 @@ class AttendanceService
                 // Auto checkout menggunakan jam pulang yang seharusnya (check_out_time)
                 $scheduledOut = Carbon::parse($workSchedule->check_out_time);
                 $autoOutTime = $attendance->work_date->copy()->setTimeFrom($scheduledOut);
-                
+
                 // Jika shift malam, check out time di hari berikutnya
                 if ($workSchedule->is_overnight) {
                     $autoOutTime->addDay();
@@ -58,10 +58,6 @@ class AttendanceService
                 $attendance = null;
             } else {
                 // Ini murni valid Check-Out untuk shift/hari ini
-                if ($attendance->check_in_at && $tappedTime->diffInMinutes($attendance->check_in_at) < 5) {
-                    throw new \Exception('Maaf, Anda baru saja absen masuk.');
-                }
-
                 $attendance->check_out_at = $tappedTime;
                 $attendance->work_hours = $attendance->calculateWorkHours();
                 $attendance->updateStatus();
@@ -178,13 +174,8 @@ class AttendanceService
                 // Ubah behavior sistem: Pura-pura absen menggantung ini sudah diurus,
                 // lalu lanjutkan fungsi ke bawah untuk membuat CHECK-IN HARI INI.
                 $attendance = null;
-            }
-            else {
+            } else {
                 // Ini murni valid Check-Out untuk shift/hari ini
-                if ($attendance->check_in_at && $tappedTime->diffInMinutes($attendance->check_in_at) < 5) {
-                    throw new \Exception('Maaf, Anda baru saja absen masuk.');
-                }
-
                 $attendance->check_out_at = $tappedTime;
                 $attendance->location_out_lat = $lat;
                 $attendance->location_out_lng = $lng;
@@ -275,17 +266,17 @@ class AttendanceService
             ->get();
 
         $summary = $employee->attendanceSummaries()->updateOrCreate(
-        [
-            'year' => $year,
-            'month' => $month,
-        ],
-        [
-            'total_present' => $attendances->whereIn('status', ['present', 'late'])->count(),
-            'total_late' => $attendances->where('status', 'late')->count(),
-            'total_absent' => $attendances->where('status', 'absent')->count(),
-            'total_work_hours' => $attendances->sum('work_hours'),
-            'total_late_minutes' => $attendances->sum('late_minutes'),
-        ]
+            [
+                'year' => $year,
+                'month' => $month,
+            ],
+            [
+                'total_present' => $attendances->whereIn('status', ['present', 'late'])->count(),
+                'total_late' => $attendances->where('status', 'late')->count(),
+                'total_absent' => $attendances->where('status', 'absent')->count(),
+                'total_work_hours' => $attendances->sum('work_hours'),
+                'total_late_minutes' => $attendances->sum('late_minutes'),
+            ]
         );
     }
 }
