@@ -92,7 +92,7 @@ class EmployeeResource extends Resource
                 TextEntry::make('name'),
                 TextEntry::make('department.name')
                     ->label('Department'),
-                    TextEntry::make('phone'),
+                TextEntry::make('phone'),
                 TextEntry::make('join_date')
                     ->date(),
                 IconEntry::make('is_active')
@@ -112,15 +112,17 @@ class EmployeeResource extends Resource
             ->columns([
                 TextColumn::make('rfid_number')
                     ->label('Kartu Absen')
+                    ->color('warning')
                     ->searchable(),
-                TextColumn::make('employee_number')
-                    ->searchable()
-                    ->label('No Karyawan'),
+                // TextColumn::make('employee_number')
+                //     ->searchable()
+                //     ->label('No Karyawan'),
                 TextColumn::make('name')
                     ->searchable()
                     ->label('Nama Lengkap'),
                 TextColumn::make('department.name')
                     ->searchable()
+                    ->badge()
                     ->label('Jabatan'),
                 TextColumn::make('phone')
                     ->label('No. Telp')

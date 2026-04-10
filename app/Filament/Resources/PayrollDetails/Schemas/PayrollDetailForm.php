@@ -53,11 +53,11 @@ class PayrollDetailForm
                             ->live(onBlur: true),
 
                         Select::make('employee_id')
-                            ->label('Relawan')
+                            ->label('Departemen dan Relawan')
                             ->required()
                             ->live(onBlur: true)
                             ->getOptionLabelFromRecordUsing(
-                                fn($record) => "{$record->employee_number} - {$record->name}"
+                                fn($record) => ($record->department ? $record->department->name : 'Tanpa Departemen') . " - {$record->name}"
                             )
                             ->relationship(
                                 name: 'employee',
@@ -301,6 +301,7 @@ class PayrollDetailForm
 
                         TextInput::make('other_deductions')
                             ->label('Potongan Lainnya')
+                            ->belowContent('Potongan lain seperti Bon, hutang, dll')
                             ->numeric()
                             ->default(0)
                             ->prefix('Rp')

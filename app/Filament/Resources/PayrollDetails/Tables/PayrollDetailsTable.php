@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\PayrollDetails\Tables;
 
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -31,10 +33,10 @@ class PayrollDetailsTable
                     )
                     ->sortable(),
 
-                TextColumn::make('employee.employee_number')
-                    ->label('No. Relawan')
-                    ->searchable()
-                    ->sortable(),
+                // TextColumn::make('employee.employee_number')
+                //     ->label('No. Relawan')
+                //     ->searchable()
+                //     ->sortable(),
 
                 TextColumn::make('employee.name')
                     ->label('Nama Relawan')
@@ -52,12 +54,12 @@ class PayrollDetailsTable
                     ->alignCenter()
                     ->toggleable(),
 
-                TextColumn::make('total_work_hours')
-                    ->label('Jam Kerja')
-                    ->formatStateUsing(fn($state) => number_format($state, 1))
-                    ->suffix(' jam')
-                    ->alignCenter()
-                    ->toggleable(),
+                // TextColumn::make('total_work_hours')
+                //     ->label('Jam Kerja')
+                //     ->formatStateUsing(fn($state) => number_format($state, 1))
+                //     ->suffix(' jam')
+                //     ->alignCenter()
+                //     ->toggleable(),
 
                 TextColumn::make('base_salary')
                     ->label('Gaji Pokok')
@@ -101,8 +103,12 @@ class PayrollDetailsTable
                     ->color('success')
                     ->url(fn($record) => route('payroll.slip', $record->id))
                     ->openUrlInNewTab(),
-                ViewAction::make(),
-                EditAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
+                    ->icon('heroicon-m-paper-clip'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
