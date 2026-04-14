@@ -421,12 +421,10 @@
         <div class="camera-container" style="background: transparent; box-shadow: none; padding: 0;">
             @if($attendanceStatus === 'none')
             <button id="btn-submit-att" class="btn btn-submit"
-                style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: none;">Check In
-                (Masuk)</button>
+                style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: none;">Masuk</button>
             @elseif($attendanceStatus === 'in')
             <button id="btn-submit-att" class="btn btn-checkout"
-                style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: none;">Check Out
-                (Pulang)</button>
+                style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: none;">Pulang</button>
             @elseif($attendanceStatus === 'done')
             <button id="btn-submit-att" class="btn btn-done" disabled
                 style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: block;">Sudah Absen
@@ -556,14 +554,16 @@
 
                             // Sesuaikan Tampilan Peta
                             if (officeCircle) {
-                                map.fitBounds(officeCircle.getBounds().extend(userMarker.getLatLng()), { padding: [20, 20] });
+                                map.fitBounds(officeCircle.getBounds().extend(userMarker.getLatLng()), {
+                                    padding: [20, 20]
+                                });
                             } else {
                                 map.setView([currentLat, currentLng], 17);
                             }
 
                             // Tampilkan tombol submit setelah lokasi didapat (hanya jika belum full absen)
-                            @if ($attendanceStatus !== 'done')
-                                btnSubmit.style.display = 'block';
+                            @if($attendanceStatus !== 'done')
+                            btnSubmit.style.display = 'block';
                             @endif
                         },
                         (error) => {
@@ -573,8 +573,11 @@
                             locStatus.className = 'status-badge error';
                             locCoords.textContent = msg;
                             showError('Silakan izinkan akses lokasi (GPS) pada browser Anda untuk absensi.');
-                        },
-                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                        }, {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
                     );
                 } else {
                     locStatus.textContent = 'Tidak Didukung';
@@ -587,7 +590,9 @@
             function showError(message) {
                 errorMsg.textContent = message;
                 errorMsg.style.display = 'block';
-                setTimeout(() => { errorMsg.style.display = 'none'; }, 5000);
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                }, 5000);
             }
 
             // Init
@@ -602,57 +607,71 @@
                     return;
                 }
 
-                loader.classList.add('show');
+                const actionText = btnSubmit.textContent.trim();
 
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                Swal.fire({
+                    title: 'Konfirmasi Absensi',
+                    text: `Apakah Anda yakin ingin melakukan ${actionText}?`,
+                    showCancelButton: true,
+                    confirmButtonColor: '#059669',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Ya, Lanjut',
+                    cancelButtonText: 'Batal'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        loader.classList.add('show');
 
-                try {
-                    const response = await fetch('/api/attendance/mobile-tap', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken
-                        },
-                        body: JSON.stringify({
-                            image_token: "", // Foto ditiadakan, kirim empty string
-                            latitude: currentLat,
-                            longitude: currentLng
-                        })
-                    });
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                    const data = await response.json();
+                        try {
+                            const response = await fetch('/api/attendance/mobile-tap', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken
+                                },
+                                body: JSON.stringify({
+                                    image_token: "", // Foto ditiadakan, kirim empty string
+                                    latitude: currentLat,
+                                    longitude: currentLng
+                                })
+                            });
 
-                    loader.classList.remove('show');
+                            const data = await response.json();
 
-                    if (response.ok && data.success) {
-                        Swal.fire({
-                            title: 'Berhasil!',
-                            text: data.message,
-                            icon: 'success',
-                            confirmButtonColor: '#059669'
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Gagal',
-                            text: data.message || 'Gagal mengirim data absensi.',
-                            icon: 'error',
-                            confirmButtonColor: '#dc2626'
-                        });
+                            loader.classList.remove('show');
+
+                            if (response.ok && data.success) {
+                                Swal.fire({
+                                    title: 'Berhasil!',
+                                    text: data.message,
+                                    icon: 'success',
+                                    confirmButtonColor: '#059669'
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Gagal',
+                                    text: data.message || 'Gagal mengirim data absensi.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#dc2626'
+                                });
+                            }
+
+                        } catch (err) {
+                            console.error(err);
+                            loader.classList.remove('show');
+                            Swal.fire({
+                                title: 'Error Jaringan',
+                                text: 'Terjadi kesalahan jaringan.',
+                                icon: 'error',
+                                confirmButtonColor: '#dc2626'
+                            });
+                        }
                     }
-
-                } catch (err) {
-                    console.error(err);
-                    loader.classList.remove('show');
-                    Swal.fire({
-                        title: 'Error Jaringan',
-                        text: 'Terjadi kesalahan jaringan.',
-                        icon: 'error',
-                        confirmButtonColor: '#dc2626'
-                    });
-                }
+                });
             });
         });
 

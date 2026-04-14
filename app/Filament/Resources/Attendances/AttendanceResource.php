@@ -114,6 +114,10 @@ class AttendanceResource extends Resource
                 TextColumn::make('employee.name')
                     ->searchable()
                     ->label('Nama Lengkap'),
+                TextColumn::make('employee.department.name')
+                    ->searchable()
+                    ->badge()
+                    ->label('Departemen'),
                 TextColumn::make('work_date')
                     ->date()
                     ->label('Tanggal Kerja'),
@@ -272,14 +276,11 @@ class AttendanceResource extends Resource
                     ->preload()
                     ->multiple(),
 
-                SelectFilter::make('status')
-                    ->label('Status')
-                    ->options([
-                        'present' => 'Hadir',
-                        'late' => 'Terlambat',
-                        'absent' => 'Tidak Hadir',
-                        'incomplete' => 'Belum Lengkap',
-                    ])
+                SelectFilter::make('department_id')
+                    ->label('Departemen')
+                    ->relationship('employee.department', 'name')
+                    ->searchable()
+                    ->preload()
                     ->multiple(),
 
                 Filter::make('work_date')
@@ -315,6 +316,16 @@ class AttendanceResource extends Resource
 
                         return $indicators;
                     }),
+
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'present' => 'Hadir',
+                        'late' => 'Terlambat',
+                        'absent' => 'Tidak Hadir',
+                        'incomplete' => 'Belum Lengkap',
+                    ])
+                    ->multiple(),
 
                 // Filter::make('late')
                 //     ->label('Terlambat')
