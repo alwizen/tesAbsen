@@ -19,13 +19,14 @@ Route::post('/m/logout', [MobileAuthController::class , 'logout'])->name('mobile
 Route::middleware([\App\Http\Middleware\CheckEmployeeSession::class])->group(function () {
     Route::get('/m/tap', [MobileAttendanceController::class , 'mobileTapView'])->name('mobile.tap');
     Route::post('/api/attendance/mobile-tap', [MobileAttendanceController::class , 'mobileTap']);
+    Route::get('/m/history', [MobileAttendanceController::class , 'mobileHistoryView'])->name('mobile.history');
 });
 
 Route::get('/payroll/slip/{payrollDetail}', [PayrollSlipController::class , 'show'])
     ->name('payroll.slip')
     ->middleware(['auth']);
 
-Route::get('/payroll/bulk-slip', [PayrollSlipController::class, 'bulkShow'])
+Route::get('/payroll/bulk-slip', [PayrollSlipController::class , 'bulkShow'])
     ->name('payroll.bulk-slip')
     ->middleware(['auth']);
 

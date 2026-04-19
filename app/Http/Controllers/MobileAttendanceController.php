@@ -94,4 +94,24 @@ class MobileAttendanceController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Tampilkan halaman riwayat absensi mobile
+     */
+    public function mobileHistoryView()
+    {
+        $employeeId = session('employee_id');
+        $employee = Employee::find($employeeId);
+
+        if (!$employee || !$employee->is_active) {
+            return redirect()->route('mobile.login')->with('error', 'Akun tidak valid atau tidak aktif.');
+        }
+
+        // Ambil riwayat absensi employee, paginate 10
+        $attendances = Attendance::where('employee_id', $employeeId)
+            ->orderBy('work_date', 'desc')
+            ->paginate(10);
+
+        return view('mobile.history', compact('employee', 'attendances'));
+    }
 }

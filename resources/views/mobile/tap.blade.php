@@ -430,6 +430,9 @@
                 style="width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; display: block;">Sudah Absen
                 Masuk & Pulang</button>
             @endif
+
+            <a href="{{ route('mobile.history') }}" class="btn btn-retake"
+                style="display: block; text-align: center; margin-top: 15px; text-decoration: none;">Riwayat Absensi</a>
         </div>
     </main>
 
@@ -562,8 +565,8 @@
                             }
 
                             // Tampilkan tombol submit setelah lokasi didapat (hanya jika belum full absen)
-                            @if($attendanceStatus !== 'done')
-                            btnSubmit.style.display = 'block';
+                            @if ($attendanceStatus !== 'done')
+                                btnSubmit.style.display = 'block';
                             @endif
                         },
                         (error) => {
@@ -574,10 +577,10 @@
                             locCoords.textContent = msg;
                             showError('Silakan izinkan akses lokasi (GPS) pada browser Anda untuk absensi.');
                         }, {
-                            enableHighAccuracy: true,
-                            timeout: 10000,
-                            maximumAge: 0
-                        }
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
                     );
                 } else {
                     locStatus.textContent = 'Tidak Didukung';
